@@ -32,7 +32,7 @@ The challenges of seawater cooling, such as the need for specialized materials a
 While this seawater cooling system may not be universally replicable due to its unique circumstances and cost, it serves as an inspiring example of how natural resources can be leveraged for eco-friendly cooling solutions.
 
 ## Google Expands Hamina's Impact with Heat for the Community
-<img src="/assets/images/datacenter-energy-use.png" alt="Data centers can utilize excess heat to provide energy for local communities" width="400" height="600">
+<img src="/assets/images/datacenter-energy-use.png" alt="Data centers can utilize excess heat to provide energy for local communities" width="600" height="400">
 
 Google has gone beyond simply cooling its servers with seawater; it's now sharing the warmth. The Hamina data center, operating with 97% carbon-free energy, recovers waste heat and provides it free of charge to the local district heating network. This covers 80% of the annual heat demand for homes, schools, and public buildings, further solidifying the data center's role as a community asset.
 
