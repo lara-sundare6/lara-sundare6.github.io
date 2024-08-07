@@ -9,7 +9,7 @@ categories: category
 
 ![The Hamina data center's exterior showcases its location and design](https://images.adsttc.com/media/images/55e8/907e/6c9d/b5e4/0f00/0042/slideshow/google_lpp_001.jpg?1441304688)
 
-As my passion for cloud computing grows, I'm drawn to Finland's vibrant tech scene, emphasis on work-life balance, and strong sense of community. The prospect of working amongst groundbreaking cloud infrastructure like the Hamina data center, with its focus on sustainability and energy efficiency, is incredibly exciting. I believe that as efforts like the Hamina data center increase, we'll discover even more innovative ways to utilize green computing to create a sustainable future for both technology and our planet.  The timing feels right to finally make my dream of living and working there a reality, and I've spent these Summer months diligently planning my move. I've been exploring job opportunities, including the virtual job fair "Rekrytori" on Tavata, and I eagerly anticipate the in-person Rekry Expo '24 in Turku this November.
+As my passion for cloud computing grows, I'm drawn to Finland's vibrant tech scene, emphasis on work-life balance, and strong sense of community. The prospect of working amongst groundbreaking cloud infrastructure like the Hamina data center, with its focus on sustainability and energy efficiency, is incredibly exciting. I believe that as efforts like the Hamina data center increase, we'll discover innovative ways to utilize green computing to create a sustainable future for both technology and our planet.  The timing feels right to finally make my dream of living and working there a reality, and I've spent these Summer months diligently planning my move. I've been exploring job opportunities, including the virtual job fair "Rekrytori" on Tavata, and I eagerly anticipate the in-person Rekry Expo '24 in Turku this November.
 
 
 > [Google's Current Green Report 2024](https://blog.google/outreach-initiatives/sustainability/2024-environmental-report/): Google's 2024 Environmental Report details the company's progress in making AI models more energy-efficient and developing tools to help other AI stakeholders reduce emissions. However, they also face challenges such as the growing energy consumption of data centers and supply chain emissions. Despite these hurdles, Google remains committed to achieving net-zero emissions by 2030.
@@ -25,22 +25,22 @@ This shift from paper production to digital infrastructure is a prime example of
 **A Technical Marvel: The Seawater Cooling System**
 ![This diagram illustrates the seawater cooling system used at the Hamina data center](https://www.researchgate.net/profile/Abimbola-Windapo/publication/312562669/figure/fig6/AS:452846454874114@1484978416227/Diagram-of-sea-water-cooling-system-8.png)
 
-One of the most captivating features of the Hamina data center is its pioneering seawater cooling system. By repurposing a quarter-mile-long tunnel originally used by the paper mill, Google ingeniously harnessed the cold water of the Bay of Finland for cooling. This approach dramatically reduces energy consumption compared to traditional air-cooling methods, aligning perfectly with the principles of sustainable design.
+One of the most captivating features of the Hamina data center is its pioneering seawater cooling system. By repurposing a quarter-mile-long tunnel originally used by the paper mill, Google harnessed the cold water of the Bay of Finland for cooling. This approach dramatically reduces energy consumption compared to traditional air-cooling methods, aligning with the principles of sustainable design.
 
 The challenges of seawater cooling, such as the need for specialized materials and robust filtration to prevent corrosion and fouling (Ebrahimi et al., 2014), were meticulously addressed by Google. Advanced filtration systems, fiberglass-reinforced piping, titanium plates, and thermal modeling ensure the system's effectiveness and longevity.
 
-While this seawater cooling system may not be universally replicable due to its unique circumstances and cost, it serves as an inspiring example of how natural resources can be leveraged for eco-friendly cooling solutions.
+While this seawater cooling system may not be universally replicable due to its size, unique circumstances, and cost, it serves as an inspiring example of how natural resources can be leveraged for eco-friendly cooling solutions.
 
 ## Google Expands Hamina's Impact with Heat for the Community
 <img src="/assets/images/datacenter-energy-use.png" alt="Data centers can utilize excess heat to provide energy for local communities" width="600" height="400">
 
-Google has gone beyond simply cooling its servers with seawater; it's now sharing the warmth. The Hamina data center, operating with 97% carbon-free energy, recovers waste heat and provides it free of charge to the local district heating network. This covers 80% of the annual heat demand for homes, schools, and public buildings, further solidifying the data center's role as a community asset.
+Google has gone beyond simply cooling its servers with seawater. The Hamina data center, operating with 97% carbon-free energy, recovers waste heat and provides it free of charge to the local district heating network. This covers 80% of the annual heat demand for homes, schools, and public buildings, solidifying the data center's role as an energy asset.
 
-This initiative aligns with research funded by the National Science Foundation, which highlights the potential of data centers as viable sources of low-grade waste heat that can be effectively recovered (Shuja et al., 2017). Hamina's district heating project demonstrates that even existing data centers can be retrofitted to provide heat for local communities, fostering a symbiotic relationship between technology and society.
+This initiative aligns with research funded by the National Science Foundation, which highlights the potential of data centers as viable sources of low-grade waste heat that can be effectively recovered (Shuja et al., 2017). Hamina's district heating project demonstrates that existing data centers can be retrofitted to provide heat for local communities, fostering a relationship between technology and human need.
 
 ## Challenges and Opportunities on the Path to a Greener Cloud
 
-While Hamina showcases the potential for sustainable data centers, research by Shuja et al. (2017) highlights the need for continued innovation. This includes modernizing data center designs to better integrate intermittent renewable energy sources, optimizing the placement of geographically dispersed data centers for both performance and sustainability, and developing efficient workload management techniques.  Further research, prototyping, and life-cycle assessments are also crucial to refining and validating sustainable technologies in the data center space.
+While Hamina showcases the potential for sustainable data centers, research by Shuja et al. (2017) highlights the need for continued innovation. This includes modernizing data center designs to integrate intermittent renewable energy sources, optimizing the placement of geographically dispersed data centers for both performance and sustainability, and developing efficient workload management techniques in software design. Further research, prototyping, and life-cycle assessments are also crucial to refining and validating sustainable technologies in the data center space.
 
 ## Change: A Catalyst for a Sustainable Future
 <img src="/assets/images/black-swallowtail-caterpillar.jpg" alt="The black swallowtail caterpillar on parsley symbolizes the transformation and potential for change" width="400" height="600">
@@ -55,6 +55,8 @@ The Hamina data center is more than just a marvel of engineering; it's a testame
 
 **Let's build a sustainable future together.**
 
+<br>
+<br>
 
 **References**
 
