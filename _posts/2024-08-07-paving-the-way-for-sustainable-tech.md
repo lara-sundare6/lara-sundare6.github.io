@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Paving the Way for Sustainable Tech: The Hamina Story"
-date: date: 2024-08-07 11:35:00 -0500
+date: 2024-08-07
 categories: category
 ---
 
