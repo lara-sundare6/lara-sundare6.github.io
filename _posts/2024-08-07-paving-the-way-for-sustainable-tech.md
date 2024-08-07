@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Paving the Way for Sustainable Tech: The Hamina Story"
-date: {{ page.date | date: "%Y-%m-%d %H:%M:%S %Z" }}
+date: date: 2024-08-07 11:35:00 -0500
 categories: category
 ---
 
