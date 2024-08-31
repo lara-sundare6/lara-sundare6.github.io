@@ -63,11 +63,10 @@ My own journey, from exploring the intersectionality of tech to advocating for s
 
 **A Vision for the Future**
 
-Imagine a world where engineers are not just cogs in the machine, but creators, innovators, and problem-solvers who are empowered to make a difference and are HAPPY. A world where collaboration thrives, where mentorship is valued, and where every engineer's voice is heard.
+Imagine a world where engineers are not just cogs in the machine, but creators, innovators, and problem-solvers who are empowered to make a difference and are HAPPY (I hope for more Developer Experience Professionals in the future!). A world where collaboration thrives, where mentorship is valued, and where every engineer's voice is heard.
 
 It's a world where the pursuit of passion trumps the pursuit of perfection, where creativity is celebrated, and where the human element is not lost amidst the lines of code. 😊
 
----
 
 
 
