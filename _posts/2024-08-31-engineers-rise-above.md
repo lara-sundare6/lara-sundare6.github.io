@@ -69,6 +69,8 @@ It's a world where the pursuit of passion trumps the pursuit of perfection, wher
 
 ---
 
+
+
 #### Sending digital warmth to you all from windy Chicago ☀️
 
 #### &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Lara Sundare 
