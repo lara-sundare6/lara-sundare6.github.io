@@ -11,11 +11,11 @@ categories: category
 - Agentic orchestration can materially increase token spend, translating directly into infrastructure and energy cost.
 - The practical response is to bound read paths, bound write paths, and preserve human authorization.
 - This post outlines a biomimetic control pattern inspired by fixed-energy biological systems.
-- I implement this pattern in Fly Island using ESC polling clamps, deviated-pursuit ingestion bounds, Redis token budgets, and SCI-aware dispatch gates.
+- I implement this pattern in Fly Island using Extremum Seeking Control (ESC) polling clamps, deviated-pursuit ingestion bounds, Redis token budgets, and SCI-aware dispatch gates.
 
 ## Who This Is For
 
-This post is for platform engineering, SRE, DevEx, FinOps, and AI governance teams that are shipping agentic workflows and need cost, reliability, and sustainability controls that can be implemented now.
+This post is for platform engineering, SRE, DevEx, FinOps, and AI governance teams that are shipping agentic workflows and need cost, reliability, and sustainability controls.
 
 # The Physical Limits of Generative Compute
 
@@ -218,7 +218,7 @@ Organisms need rest. Software that assumes infinite uptime pushes cost onto powe
 
 ## More Is Coming Soon
 
-Fly Island is still active work. I am publishing the architecture first because the pattern matters now: bounded contexts, fuel gates, sensory limits, and human authorization. The repository and deeper implementation notes will come when the system is ready to be read, tested, and used with care.
+Fly Island is still ongoing work. I am publishing the architecture first :) The repository and deeper implementation notes will come when the system is ready for public review.
 
 # References
 
