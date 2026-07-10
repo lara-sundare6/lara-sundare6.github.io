@@ -100,82 +100,55 @@ This code applies both proximal hoverfly rules from the literature. Rule 1 gover
 Unbounded agent swarms run unchecked because they lack operational boundaries. The result is a wasted infrastructure budget. To survive, we implement bounded contexts that control agent behavior at the source. The centralized coordination of an AI Hive structurally differs from the decentralized brute force of a swarm. Hives build engineering guardrails from the very beginning.
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    participant GH as GitHub API
-    participant ESC as EscController
-    participant HF as Hoverfly or STMD
-    participant RW as RemediationWorker
-    participant CE as GitHubCostEngine
-    participant RCA as RootCauseAnalyzer
-    participant LLM as OpenAI LLM
-    participant Redis
-    participant BC as BeeConsumer
+flowchart TB
+    source[GitHub telemetry] --> esc[ESC polling clamp]
+    esc --> hoverfly[Hoverfly read path]
+    hoverfly --> pursuit[Deviated pursuit ingestion cap]
+    pursuit --> analyzer[Root cause analyzer]
 
-    Note over GH,ESC: Telemetry event trigger (ESC-governed poll cycle)
+    analyzer --> canary{Canary present?}
+    canary -->|yes| reject[Reject LLM output]
+    canary -->|no| validate[Validate patch paths]
 
-    GH->>ESC: RTT measurement via rtt_rx
-    ESC->>ESC: tick with sin perturbation
-    ESC->>ESC: baseline_objective_lpf update from latency
-    ESC->>ESC: raw_gradient update from perturbation
-    ESC->>ESC: lpf_state filtered update
-    ESC->>ESC: baseline interval integrator step
-    ESC->>ESC: dual clamp for baseline and effective interval
-    ESC->>HF: PollingRate and polling_watch_tx
-    HF->>RW: RemediationRequest from process_anomaly
-    RW->>GH: GET actions run timing
-    GH-->>RW: linux windows macos job durations in ms
-    RW->>CE: compute cost with run_id jobs and region
-    CE->>CE: billable minutes per job
-    CE->>CE: effective minutes with OS multiplier
-    CE->>CE: total cost in USD
-    CE->>CE: kwh_per_effective_minute equals 0.0003
-    CE->>CE: estimated kwh from effective minutes
-    CE->>CE: sci_rate from energy grid intensity and embodied carbon
-    CE-->>RW: PipelineCostReport
-    RW->>GH: fetch workflow run logs
-    GH-->>RW: raw log lines after sanitize_log_lines
-    RW->>RCA: analyze log_lines failure_domain and call context
-    RCA->>LLM: agent prompt with log excerpt
-    LLM-->>RCA: raw response string
+    validate --> plan[Remediation plan]
+    plan --> token{Redis token budget}
+    plan --> carbon{SCI carbon gate}
 
-    alt CANARY_8A3F found in raw string pre-deserialization
-        RCA->>RCA: response contains CANARY_8A3F
-        RCA->>RCA: llm_response_rejected_total and circuit breaker increment
-        RCA-->>RW: RootCauseSummary with RestartJob
-    else Canary absent proceed to deserialize
-        RCA->>RCA: strip_markdown_fences raw
-        RCA->>RCA: deserialize LlmResponse JSON
-        opt patch_strategy equals CreatePullRequest
-            loop each file_patch.path
-                RCA->>RCA: validate_patch_path with eight rules
-            end
-            alt any rule violation
-                RCA->>RCA: downgrade PatchStrategy to RestartJob
-            else all paths pass
-                RCA->>RCA: retain CreatePullRequest
-            end
-        end
-        RCA-->>RW: RootCauseSummary
+    token -->|exhausted| block[Block dispatch]
+    carbon -->|over limit| block
+    token -->|budget remains| authorize[Human authorization]
+    carbon -->|within limit| authorize
+
+    authorize --> bee[Bee write path]
+    bee --> patch[Patch or repair action]
+
+    subgraph readPath[Read path: sensory limits]
+        direction TB
+        esc
+        hoverfly
+        pursuit
     end
 
-    RW->>RW: build remediation plan with cost report and patch strategy
-    RW->>BC: bee_tx send plan and GitHubClient
-    BC->>Redis: SETNX token budget key with daily limit
-    opt key was new
-        BC->>Redis: EXPIRE key 86400
+    subgraph analysisBoundary[Analysis boundary: untrusted model output]
+        direction TB
+        analyzer
+        canary
+        reject
+        validate
     end
-    BC->>Redis: DECR token budget key
-    alt DECR result nonnegative token consumed
-        Redis-->>BC: remaining balance nonnegative
-        BC->>BC: revalidate_allowlist then execute_bee_remediation
-    else DECR result negative budget exhausted
-        Redis-->>BC: negative value
-        BC->>Redis: INCR key restore counter and prevent underflow
-        BC->>BC: budget_exhausted_counter increment and drop plan
-        BC-->>HF: bee_outcome_tx reports BudgetExhausted
+
+    subgraph writePath[Write path: fuel gates]
+        direction TB
+        token
+        carbon
+        block
+        authorize
+        bee
+        patch
     end
 ```
+
+The sequence is intentionally bounded. Telemetry enters through the read path, where ESC and Deviated Pursuit constrain polling and ingestion. The analyzer can propose a repair, but model output remains untrusted until it passes canary and path validation. Write actions then face fuel gates: Redis token budget, SCI carbon threshold, and human authorization.
 
 ### Defense in Depth: Read Path and Write Path Isolation
 
