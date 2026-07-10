@@ -216,6 +216,10 @@ Platform engineering teams can adopt biomimetic constraints today. The transitio
 
 Organisms need rest. Software that assumes infinite uptime pushes cost onto power grids and water systems. Unbounded agent deployment is a systemic hazard. Fly Island proves that we can cap reads, writes, tokens, and carbon while keeping the human in control. We must steward these systems intentionally. We cannot allow unchecked compute to consume the physical world.
 
+## More Is Coming Soon
+
+Fly Island is still active work. I am publishing the architecture first because the pattern matters now: bounded contexts, fuel gates, sensory limits, and human authorization. The repository and deeper implementation notes will come when the system is ready to be read, tested, and used with care.
+
 # References
 
 1. Augment Code. "AI Agent Loop Token Costs: How to Constrain Context." 2026.
