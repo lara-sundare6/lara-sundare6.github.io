@@ -9,7 +9,7 @@ categories: category
 
 - Unbounded agent loops fail mathematically and operationally as task chains lengthen and retries compound.
 - Agentic orchestration can materially increase token spend, translating directly into infrastructure and energy cost.
-- The practical response is architectural, not rhetorical: bound read paths, bound write paths, and preserve human authorization on high-impact actions.
+- The practical response is to bound read paths, bound write paths, and preserve human authorization.
 - This post outlines a biomimetic control pattern inspired by fixed-energy biological systems.
 - I implement this pattern in Fly Island using ESC polling clamps, deviated-pursuit ingestion bounds, Redis token budgets, and SCI-aware dispatch gates.
 
