@@ -191,8 +191,6 @@ The cost engine records thermodynamic spend inside the CI pipeline. It isolates 
 
 Total effective runner minutes times 0.0003 yields estimated workflow energy. Bounded polling and burst caps cut runner-minutes and grid draw.
 
-**Circular Compute and the Human Orchestrator**
-
 ## Waste Heat and Edge Architecture
 
 Data centers generate extreme waste heat during heavy model orchestration. Expanding data centers to support continuous AI compute strains municipal resources. Jha et al., citing The Economist (2024), estimate GPT-4 training energy on the order of powering 50 American homes for 100 years (order-of-magnitude estimate, not a metered training log). Data centers expend about 40 percent of their electricity on computing. The remaining 60 percent powers non-computing systems; of that share, roughly 40 percent goes to HVAC and about 20 percent to power delivery, fans, and IT drivers (Jha et al.). Google's Hamina site captures server waste heat to cover about 80 percent of annual district heating demand in Hamina, Finland (Google). Heat recovery works at known sites. It is not default everywhere.
