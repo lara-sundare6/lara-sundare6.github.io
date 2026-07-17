@@ -4,13 +4,9 @@ title: "Fly Island: AgentOps for bounded CI/CD remediation"
 permalink: /fly-island/
 ---
 
-# Fly Island: AgentOps for bounded CI/CD remediation
-
 *A solo-built platform for observing CI failures, costing them, and remediating them only inside hard bounds.*
 
 ---
-
-## What it is
 
 Fly Island is a solo-built AgentOps platform, written in Rust, that watches GitHub Actions pipelines, calculates the real dollar and carbon cost of every run, and remediates failures only under explicit operational bounds. A persistent observer agent (Hoverfly) detects anomalies and works out root cause, but it has no access to any write tool, so it can't act on what it finds even if it wanted to. When remediation looks warranted, Hoverfly hands a typed plan to a separate, short-lived worker agent (Bee), which is the only component that can execute the plan through the Model Context Protocol (MCP), and Bee exits once it's done. The reason for the split is that reasoning and execution shouldn't share the same privileges: if the LLM hallucinates or gets manipulated by prompt injection, it still has no path to a GitHub write call. The system ships in shadow mode by default, so it can observe, classify, and draft remediation plans in production without ever touching a live repository, until a promotion gate confirms it's safe to enable writes. Everything below describes what's actually implemented, not a roadmap.
 
@@ -48,7 +44,7 @@ The point of the three-way split is that the agent with the most situational awa
 
 ---
 
-## Safety and reliability gates
+## Safety and reliability guardrails
 
 Everything below is implemented and enforced by an automated test, not aspirational:
 
@@ -66,7 +62,7 @@ Everything in this list ships behind tests. None of it is a "coming soon" featur
 
 ---
 
-## Cost and carbon as controls
+## Cost and carbon controls
 
 Fly Island uses US dollar cost and Software Carbon Intensity (SCI, the Green Software Foundation's per-execution carbon metric) as gates the system checks before it acts, not as numbers on a dashboard nobody looks at. Every pipeline run produces a cost report with billable runner minutes, estimated kilowatt-hours, and an SCI rate, and if a report can't compute a carbon rate, it gets treated as incomplete and doesn't get surfaced to the frontend. The SCI formula follows the standard Green Software Foundation definition:
 
