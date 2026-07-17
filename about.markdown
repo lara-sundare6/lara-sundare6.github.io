@@ -6,7 +6,9 @@ permalink: /about/
 
 ## About Lara Sundare
 
-Hi, I'm Lara! Welcome to my blog where I share my journey in DevOps, tech consulting, and sustainability. I have a strong background in computer science, tech consulting, and communication training, shaped by a variety of formative experiences.
+Hi, I’m Lara! Welcome to my blog. I write about cloud consulting, AI infrastructure, developer experience, and building tech that’s more honest, governable, and sustainable.
+
+I’m an AgentOps Cloud Consultant and AI Infrastructure Engineer based in Chicago. My path runs through audio engineering, computer science, and tech consulting, shaped by communication, systems thinking, and a lot of formative experiences along the way.
 
 ### My Background
 
@@ -14,7 +16,9 @@ I started my career as an Audio Engineer pre-2020. As I began my journey into co
 
 ### Professional Journey
 
-Over the past year, I’ve worked in tech consulting with some incredible colleagues who are giants in cloud computing DevOps, and improving developer experiences. I have worked on various projects, including developing GitHub training modules, optimizing CI/CD pipelines, creating a DevOps questionnaire for clients, and managing large-scale repository migrations. These experiences have deepened my understanding of sustainable practices and the importance of clear, honest communication in tech.
+At InfoMagnus (2023-2024), I worked as a DevOps Engineer & Consultant: GitHub Enterprise migrations at Fortune 500 scale, CI/CD and developer workflow design, and enterprise Git training. Those years taught me how much clear communication and sustainable delivery practices matter when change hits thousands of developers.
+
+Since June 2025, I’ve been an Associate Cloud Consultant at Burwood Group (acquired by Sikich), where I architect and deploy AI platform infrastructure on Google Cloud: RAG pipelines, Vertex AI and Gemini-powered systems, Terraform-managed secure environments, and automated governance and compliance. In parallel, I build Fly Island, an independent Rust CI/CD observability platform that tracks pipeline cost in both USD and carbon metrics.
 
 ### Why I Do What I Do
 
@@ -24,7 +28,7 @@ My love for developer experience, paired with my grandfather's roots as a farmer
 
 ### The Bigger Picture
 
-Beyond my professional role as a DevOps Engineer, I care deeply about how our conversations and actions in tech affect us all. I believe in fostering meaningful, honest dialogues that lead to sustainable futures. This holistic approach to tech is something I bring into all my projects.
+Beyond shipping cloud and AI systems, I care deeply about how our conversations and actions in tech affect us all. I believe in fostering meaningful, honest dialogues that lead to sustainable futures. This holistic approach to tech is something I bring into all my projects.
 
 ### Let's Connect!
 
