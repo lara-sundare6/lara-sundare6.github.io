@@ -8,7 +8,11 @@ permalink: /fly-island/
 
 ---
 
-Fly Island is a solo-built AgentOps platform, written in Rust, that watches GitHub Actions pipelines, calculates the real dollar and carbon cost of every run, and remediates failures only under explicit operational bounds. A persistent observer agent (Hoverfly) detects anomalies and works out root cause, but it has no access to any write tool, so it can't act on what it finds even if it wanted to. When remediation looks warranted, Hoverfly hands a typed plan to a separate, short-lived worker agent (Bee), which is the only component that can execute the plan through the Model Context Protocol (MCP), and Bee exits once it's done. The reason for the split is that reasoning and execution shouldn't share the same privileges: if the LLM hallucinates or gets manipulated by prompt injection, it still has no path to a GitHub write call. The system ships in shadow mode by default, so it can observe, classify, and draft remediation plans in production without ever touching a live repository, until a promotion gate confirms it's safe to enable writes. Everything below describes what's actually implemented, not a roadmap.
+Fly Island is a solo-built AgentOps platform, written in Rust. It watches GitHub Actions pipelines, calculates the dollar and carbon cost of every run, and remediates failures only inside hard operational bounds.
+
+A persistent observer agent (Hoverfly) detects anomalies and works out their root cause, but it has no write access. When remediation looks warranted, the Hoverfly hands a typed plan to a short-lived worker (Bee). The Bee is the only component that can execute through the Model Context Protocol, and it exits when the work is done. That way, reasoning and execution do not share privileges. If the model hallucinates or is prompt-injected, it won't have a path to a write on GitHub.
+
+The system ships in read mode by default. It can observe, classify, and draft plans without touching a live repository until writes are deliberately turned on.
 
 ---
 
@@ -18,62 +22,83 @@ Fly Island is a solo-built AgentOps platform, written in Rust, that watches GitH
 flowchart LR
     A[GitHub Actions telemetry<br/>webhooks + REST] --> B[Hoverfly<br/>observe + plan]
     B -->|typed RemediationPlan<br/>over a channel| C[Bee<br/>ephemeral MCP write task]
-    C --> D["Gates<br/>token budget · SCI carbon budget<br/>path allowlist · circuit breaker<br/>shadow mode check"]
+    C --> D["Gates<br/>token budget · SCI carbon budget<br/>path allowlist · circuit breaker<br/>read mode check"]
     D -->|pass| E[GitHub write action<br/>PR or job restart]
     D -.->|blocked| F[Human / admin controls]
-    B -.->|shadow mode:<br/>no write dispatched| F
-    F -->|promote / disable / reset| B
+    B -.->|read mode:<br/>no write dispatched| F
+    F -->|enable writes / disable / review| B
 ```
 
-Hoverfly and Bee only talk to each other through a typed message passed over a channel, not through shared memory. Any of the gates in the middle box can independently stop a dispatch, and a human operator can disable writes or reset the circuit breaker at any time without restarting anything.
+Hoverfly and Bee exchange a typed message over a channel. They do not share memory. Each gate can stop a dispatch on its own. An operator can disable writes or review system state without restarting the process.
 
 ---
 
 ## Agent roles
 
-- **Hoverfly** is the persistent observer and planner. It runs continuously, watches the telemetry stream, and produces a `RemediationPlan`, but it has no write access at all. Keeping this agent long-lived and side-effect-free means its reasoning can be inspected, replayed, and rate-limited without any risk of an accidental production write.
-- **Bee** is the ephemeral executor. It's spawned once per remediation, consumes exactly one plan, calls exactly one MCP write tool, terminates, and keeps no memory across runs. Keeping the execution surface this narrow limits the damage of any single bad decision to one action.
-- **Farmer** is the conversational interface over live agent state. It answers operator questions about what the system is currently doing and why, in terms of the underlying control state, and it reports a confidence score instead of presenting a guess as settled fact. It doesn't plan or execute anything itself, and its job is just to explain what the other two agents are doing.
+- **Hoverfly** observes the telemetry and produces a Remediation Plan if needed. It stays long-lived and side-effect-free, so its reasoning can be inspected, replayed, and rate-limited without risking a write in production.
+- **Bee** runs once per remediation. It consumes one plan, calls one MCP write tool, then stops with no memory across runs so that one bad decision will produce at most one action.
+- **Farmer Chat** answers operator's questions about live control state. It reports a confidence score instead of presenting a guess as fact. It does not plan or execute.
 
-The point of the three-way split is that the agent with the most situational awareness (Hoverfly) never gets write access, the agent with write access (Bee) never gets much awareness, and the agent a human talks to (Farmer) doesn't get either.
+Hoverflies have the most context and no write access. Bees have write access and almost no lasting context. Farmer Chat talks to humans.
 
 ---
 
 ## Safety and reliability guardrails
 
-Everything below is implemented and enforced by an automated test, not aspirational:
+These controls are running and tested:
 
-- **Architecture boundary**: the reasoning module can't import the MCP/write module. An architecture test enforces this directly, not just a code review convention.
-- **Write-path allowlist re-validation**: any proposed file patch is re-checked against an explicit path allowlist right before dispatch, independent of the upstream reasoning step, so a patch to a non-allowlisted path gets downgraded to a safe restart even if the upstream check were somehow bypassed.
-- **Prompt-injection canary check**: LLM responses are scanned for a canary token before they're deserialized into a remediation plan. A hit rejects the response, counts toward a rejection metric, and trips the circuit breaker instead of letting the response proceed.
-- **LLM circuit breaker**: after repeated failures, the breaker opens and the agent falls back to a safe restart strategy (no PR creation) until a half-open trial call succeeds. This keeps a degraded model provider from getting hammered with retries.
-- **Shadow mode by default**: write actions are disabled out of the box. The full remediation pipeline runs end to end, including plan generation, but the actual network write gets intercepted, so the system can be validated against live traffic with zero write risk.
-- **Promotion gate**: moving from shadow to live mode requires an explicit check across several independent signals (no dropped events, no stuck channels, a closed circuit breaker, and at least one real detection observed) before writes get enabled at all.
-- **Daily token/cost budget gate**: a per-repository budget on LLM token spend is enforced before a remediation task can run, and exhausting it blocks further dispatch until the budget resets.
-- **Carbon (SCI) budget gate**: a remediation plan whose estimated carbon cost exceeds a configured ceiling gets blocked instead of dispatched, and the block is visible to an operator.
-- **Admin kill switch**: writes can be disabled instantly through an authenticated endpoint, with no restart required, and the disabled state shows up as a metric.
+- **Architecture boundary.** The reasoning module cannot import the MCP write path. `agent_module_does_not_import_mcp` enforces that in `tests/architecture.rs`.
+- **Write-path allowlist.** Bee re-checks every patch path at dispatch. An adversarial `/etc/passwd` path is downgraded to `RestartJob` instead of opening a PR.
+- **Prompt-injection canary.** A response containing `CANARY_8A3F` is rejected and counts toward opening the circuit breaker.
+- **LLM circuit breaker.** After repeated failures, the breaker opens. The agent falls back to safe restarts (no PR creation) until a half-open trial succeeds.
+- **Read mode by default.** `APP_DISABLE_BEE_WRITES` defaults to `true`. The pipeline still plans end to end; the write is intercepted on the tested dry-run path.
+- **Before writes are turned on.** Writes stay off until independent eligibility checks pass. CI covers unauthorized and ineligible requests to enable them.
+- **Daily token budget.** Exhausting the per-repository LLM budget blocks further dispatch until the budget resets.
+- **Carbon (SCI) budget.** A plan whose estimated carbon cost exceeds the configured ceiling is blocked.
+- **Admin kill switch.** An authenticated endpoint disables writes immediately, with no restart.
 
-Everything in this list ships behind tests. None of it is a "coming soon" feature described as if it already runs.
+From CI run `28970279383` at SHA `de23615` (Ubuntu 24.04):
+
+```text
+2026-07-08T19:37:57.9432105Z test agent::root_cause_analyzer::tests::canary_injection_increments_rejected_and_trips_cb ... ok
+2026-07-08T19:37:58.2192531Z test tasks::bee_consumer::tests::revalidate_allowlist_downgrades_non_allowlisted_create_pr ... ok
+2026-07-08T19:38:03.4105452Z test agent_module_does_not_import_mcp ... ok
+2026-07-08T19:37:58.8400657Z test result: ok. 205 passed; 0 failed; finished in 1.14s
+```
+
+### A failure that changed the design
+
+The first LLM parser used Serde's `deny_unknown_fields`. Real model responses included extra `reasoning` fields and broke deserialization. That rule came out. Extra fields are tolerated now. What can execute is still bounded by the canary, path validation, and Bee's final allowlist.
 
 ---
 
 ## Cost and carbon controls
 
-Fly Island uses US dollar cost and Software Carbon Intensity (SCI, the Green Software Foundation's per-execution carbon metric) as gates the system checks before it acts, not as numbers on a dashboard nobody looks at. Every pipeline run produces a cost report with billable runner minutes, estimated kilowatt-hours, and an SCI rate, and if a report can't compute a carbon rate, it gets treated as incomplete and doesn't get surfaced to the frontend. The SCI formula follows the standard Green Software Foundation definition:
+Dollar cost and Software Carbon Intensity (SCI) are gates before dispatch, not decoration. An approved fixture for a ten-minute Linux run:
+
+```yaml
+# I = 386 gCO2/kWh (us-east)
+billable_minutes_linux: 10
+estimated_kwh: 0.003
+sci_rate: 0.001658
+total_cost_usd: 0.08
+```
+
+A blocked fixture uses a 120-minute macOS run with `sci_rate: 0.00055584` against `max_sci_rate_per_bee: 0.0001`. The outcome is `RemediatingBlocked / SciBudget`. Both fixture tests passed in the CI run above.
 
 ```
 SCI = ((E × I) / 1000 + M / 1000) / R    [kgCO2eq per execution]
 ```
 
-where `E` is energy consumed, `I` is the grid carbon intensity for the runner's region, `M` is embodied carbon, and `R` is the functional unit (one pipeline execution). Regional grid-intensity values are configuration, not hardcoded constants, so they can be updated as better regional data becomes available. There are no invented "X% savings" numbers here. The system reports what a run cost and what it emitted, and it blocks a remediation when either number crosses a configured budget.
+`E` is energy, `I` is regional grid intensity, `M` is embodied carbon, and `R` is one pipeline execution. Grid intensity is configuration. The fixtures include a `configured_override` for `europe-west1`.
 
 ---
 
 ## Stack
 
-Rust (Tokio async runtime, Axum for HTTP/WebSocket), React Flow on TypeScript for the frontend canvas, Redis for lease coordination and budget counters, Docker and GKE for deployment, Prometheus and OpenTelemetry for observability, GitHub Actions webhooks and REST API for telemetry, and the Model Context Protocol for the agent write path.
+Rust (Tokio, Axum), React Flow on TypeScript, Redis, Docker and GKE, Prometheus and OpenTelemetry, GitHub Actions webhooks and REST, MCP for the agent write path.
 
-The agent execution path (detection, planning, remediation) is Rust-only by design, with no Python, Node.js, Go, or Java anywhere in that path. This is a deliberate constraint chosen for predictable latency (no GC pauses in the control loops) and a smaller attack surface at the write boundary, not an accident of what got written first.
+The agent execution path is Rust-only. An earlier Python MCP echo helper was removed and replaced with a Rust `EchoMcpTransport`. That choice is about predictable latency and a smaller write-boundary surface, not about what got written first.
 
 ---
 
@@ -81,4 +106,4 @@ The agent execution path (detection, planning, remediation) is Rust-only by desi
 
 The essay behind the design decisions: [Biomimetic engineering: capping the physical cost of unbounded AI](https://lara-sundare6.github.io/category/2026/07/10/biomimetic-engineering-capping-the-physical-cost-of-unbounded-ai.html)
 
-An architecture walkthrough, including the control algorithms behind anomaly detection and the test harness that enforces the boundaries above, is available on request or in an interview.
+An architecture walkthrough of the control algorithms and test harness is available on request or in an interview.
