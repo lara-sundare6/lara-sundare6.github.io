@@ -18,15 +18,10 @@ Fly Island is a solo-built AgentOps platform, written in Rust, that watches GitH
 flowchart LR
     A[GitHub Actions telemetry<br/>webhooks + REST] --> B[Hoverfly<br/>observe + plan]
     B -->|typed RemediationPlan<br/>over a channel| C[Bee<br/>ephemeral MCP write task]
-    C --> D{Gates}
-    D -->|token budget| D
-    D -->|SCI carbon budget| D
-    D -->|patch path allowlist| D
-    D -->|circuit breaker| D
-    D -->|shadow mode check| D
-    D --> E[GitHub write action<br/>PR or job restart]
-    B -.->|shadow mode:<br/>no write dispatched| F[Human / admin controls]
-    D -.->|blocked| F
+    C --> D["Gates<br/>token budget · SCI carbon budget<br/>path allowlist · circuit breaker<br/>shadow mode check"]
+    D -->|pass| E[GitHub write action<br/>PR or job restart]
+    D -.->|blocked| F[Human / admin controls]
+    B -.->|shadow mode:<br/>no write dispatched| F
     F -->|promote / disable / reset| B
 ```
 
