@@ -1,10 +1,8 @@
 ---
 layout: page
-title: About
+title: About Lara Sundare
 permalink: /about/
 ---
-
-## About Lara Sundare
 
 Hi, I’m Lara! Welcome to my blog. I write about cloud consulting, AI infrastructure, developer experience, and building tech that’s more honest, governable, and sustainable.
 
