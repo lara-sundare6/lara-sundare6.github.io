@@ -27,6 +27,8 @@ exclude:
   - vendor/cache/
   - vendor/gems/
   - vendor/ruby/
+  - voice.md
+  - "Biomimetic Engineering_ Bounding the Thermodynamic Cost of Agentic AI.md"
 
 # Social links (optional)
 social:
