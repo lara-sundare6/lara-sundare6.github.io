@@ -98,7 +98,7 @@ SCI = ((E × I) / 1000 + M / 1000) / R    [kgCO2eq per execution]
 
 Rust (Tokio, Axum), React Flow on TypeScript, Redis, Docker and GKE, Prometheus and OpenTelemetry, GitHub Actions webhooks and REST, MCP for the agent write path.
 
-The agent execution path is Rust-only. An earlier Python MCP echo helper was removed and replaced with a Rust `EchoMcpTransport`. That choice is about predictable latency and a smaller write-boundary surface, not about what got written first.
+The agent execution path is Rust-only. An earlier Python MCP echo helper was removed and replaced with a Rust `EchoMcpTransport`. That choice is about predictable latency and a smaller write-boundary surface.
 
 ---
 
