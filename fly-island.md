@@ -9,11 +9,11 @@ permalink: /fly-island/
 <figure style="margin: 1.75rem -12% 1.25rem; max-width: none;">
   <img
     src="/assets/fly-island/fly-island-architecture.svg"
-    alt="Fly Island architecture: GitHub Actions telemetry enters a Rust control plane where Hoverfly observes, a bounded worker plans, and only an ephemeral Bee can execute through gated MCP tools."
+    alt="Fly Island architecture: GitHub Actions telemetry enters a Rust control plane where Hoverfly observes, a bounded worker reserves budget and plans, and only an ephemeral Bee can execute a brokered repository-scoped GitHub write."
     style="width: 100%; height: auto; display: block;"
   />
   <figcaption style="margin-top: 0.85rem; font-size: 0.95rem; line-height: 1.45; color: #555;">
-    <em>Hoverfly stays long-lived and observant. A separate remediation worker turns detections into a typed plan. Bee is the only component that can act, and it runs once, does one bounded write through MCP (with a controlled REST fallback), then exits. Between plan and act sit hard gates: shadow mode by default, path allowlists, token and carbon budgets, a circuit breaker, and an admin kill switch.</em>
+    <em>Hoverfly stays long-lived and observant. A separate remediation worker times the failing run, reserves SCI/USD/token budget, and produces a typed plan. Bee is the only component that can act: it runs once, performs one brokered repository-scoped REST write, then exits. Between plan and act sit hard gates: fail-closed pre-effect governance, scoped principals, a path allowlist, a circuit breaker, and an admin kill switch.</em>
   </figcaption>
 </figure>
 

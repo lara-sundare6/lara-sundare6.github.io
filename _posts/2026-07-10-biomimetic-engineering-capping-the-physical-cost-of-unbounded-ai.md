@@ -99,56 +99,18 @@ This code applies both proximal hoverfly rules from the literature. Rule 1 gover
 
 Unbounded agent swarms run unchecked because they lack operational boundaries. The result is a wasted infrastructure budget. To survive, we implement bounded contexts that control agent behavior at the source. The centralized coordination of an AI Hive structurally differs from the decentralized brute force of a swarm. Hives build engineering guardrails from the very beginning.
 
-```mermaid
-flowchart TB
-    source[GitHub telemetry] --> esc[ESC polling clamp]
-    esc --> hoverfly[Hoverfly read path]
-    hoverfly --> pursuit[Deviated pursuit ingestion cap]
-    pursuit --> analyzer[Root cause analyzer]
+<figure style="margin: 1.75rem 0 1.25rem;">
+  <img
+    src="/assets/fly-island/fly-island-architecture.svg"
+    alt="Fly Island architecture: GitHub Actions telemetry enters a Rust control plane where Hoverfly observes, a bounded worker reserves budget and plans, and only an ephemeral Bee can execute a brokered repository-scoped GitHub write."
+    style="width: 100%; height: auto; display: block;"
+  />
+  <figcaption style="margin-top: 0.85rem; font-size: 0.95rem; line-height: 1.45; color: #555;">
+    <em>Observe, plan, and act stay isolated. Hoverfly has no write tools. The remediation worker must reserve SCI, USD, and token budget before a Bee is enqueued. Bee then mints a repository-scoped GitHub App token and performs one REST write.</em>
+  </figcaption>
+</figure>
 
-    analyzer --> canary{Canary present?}
-    canary -->|yes| reject[Reject LLM output]
-    canary -->|no| validate[Validate patch paths]
-
-    validate --> plan[Remediation plan]
-    plan --> token{Redis token budget}
-    plan --> carbon{SCI carbon gate}
-
-    token -->|exhausted| block[Block dispatch]
-    carbon -->|over limit| block
-    token -->|budget remains| authorize[Human authorization]
-    carbon -->|within limit| authorize
-
-    authorize --> bee[Bee write path]
-    bee --> patch[Patch or repair action]
-
-    subgraph readPath[Read path: sensory limits]
-        direction TB
-        esc
-        hoverfly
-        pursuit
-    end
-
-    subgraph analysisBoundary[Analysis boundary: untrusted model output]
-        direction TB
-        analyzer
-        canary
-        reject
-        validate
-    end
-
-    subgraph writePath[Write path: fuel gates]
-        direction TB
-        token
-        carbon
-        block
-        authorize
-        bee
-        patch
-    end
-```
-
-The sequence is intentionally bounded. Telemetry enters through the read path, where ESC and Deviated Pursuit constrain polling and ingestion. The analyzer can propose a repair, but model output remains untrusted until it passes canary and path validation. Write actions then face fuel gates: Redis token budget, SCI carbon threshold, and human authorization.
+The sequence is intentionally bounded. Telemetry enters through the read path, where ESC and Deviated Pursuit constrain polling and ingestion. The analyzer can propose a repair, but model output remains untrusted until it passes canary and path validation. Before Bee can act, fail-closed pre-effect governance reserves SCI, per-run USD, daily repository USD, and token budget. Writes then use a brokered, repository-scoped GitHub App credential rather than an ambient token.
 
 ### Defense in Depth: Read Path and Write Path Isolation
 
@@ -162,14 +124,14 @@ During each execution tick, the controller calculates a specific ingestion rate.
 
 ### Financial Gates on the Write Path
 
-The Redis token gate operates independently on the write path. A configured daily token budget acts as the absolute dispatch boundary. Setting this limit above zero enforces the boundary. Setting the limit to zero disables the gate entirely, providing an unlimited override.
+The Redis token gate operates independently on the write path. A configured daily token budget acts as the absolute dispatch boundary. Setting this limit above zero enforces the boundary. Setting the limit to zero is a development-only opt-out and is rejected in production.
 
-Before dispatching a repair plan, the system evaluates the daily token budget. It atomically subtracts from a per-repository counter using a Redis gate. Budget exhaustion triggers a fail-closed state, while infrastructure errors trigger a fail-open state.
+Before a Bee can be enqueued, the system evaluates SCI, per-run USD, daily repository USD, and token budget in one fail-closed transaction. It atomically reserves integer USD micros and a dispatch token against a dedicated Redis store. A retry of the same plan returns the prior decision without double charging. Budget exhaustion or a Redis outage blocks dispatch.
 
-1. The system deducts the execution cost from the daily counter.
-2. Dispatch proceeds if the remaining balance is zero or higher.
-3. If the balance falls below zero, the gate blocks the dispatch. The system immediately restores the counter to prevent underflow and logs a warning.
-4. If the Redis database drops offline, the system allows the dispatch to proceed. This fail-open design ensures a backend infrastructure outage does not halt critical repairs.
+1. The system attempts an atomic reservation of the estimated USD cost and one dispatch token.
+2. Dispatch proceeds only if the reservation succeeds.
+3. If the daily USD or token ceiling would be exceeded, the gate blocks the dispatch and never enqueues a Bee.
+4. If the dedicated governance Redis store is unavailable, the decision fails closed. An infrastructure outage does not authorize a write.
 
 The biological model defines this state as fuel exhaustion. An organism cannot forage without physical energy. The software cannot dispatch repairs without an active token budget.
 
@@ -206,7 +168,7 @@ Fly Island is an exocortex, not an automated replacement. Biological systems sur
 Platform engineering teams can adopt biomimetic constraints today. The transition requires moving away from unbounded multi-agent swarms and implementing hard systemic gates. Follow this three-layer pattern to secure enterprise architectures.
 
 1. Do not let agents ingest unlimited webhook noise. Bind network polling to network latency using Extremum Seeking Control. Clamp the anomaly ingestion rate to a hard ceiling.
-2. Decouple agent reasoning from the execution of tool calls. Force every patch dispatch or write action to pass an independent token-budget check via a fast in-memory store like Redis. Default to a fail-closed posture on budget exhaustion.
+2. Decouple agent reasoning from the execution of tool calls. Force every patch dispatch or write action to pass an independent fail-closed budget check via a dedicated Redis policy store. Default to a fail-closed posture on budget exhaustion or store unavailability.
 3. Design systems as an exocortex. Use AI to analyze failures and propose remediations, but require human authorization for deployment.
 
 
